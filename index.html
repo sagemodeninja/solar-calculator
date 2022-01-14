@@ -1,0 +1,201 @@
+<h1>Compute Appliance Power Draw</h1>
+<table>
+    <tr>
+        <td>Solar Wattage:</td>
+        <td>
+            <input id="solar_wattage" placeholder="Solar Wattage (Watts)">
+        </td>
+    </tr>
+    <tr>
+        <td>Controller Type:</td>
+        <td>
+            <select id="controller_type">
+                <option value="0.75">PWM</option>
+                <option value="0.95">MPPT</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>Appliance Load:</td>
+        <td>
+            <select id="app_load_type">
+                <option value="0">Watts</option>
+                <option value="1">Volts + Ampere</option>
+            </select>
+            <input id="app_load" placeholder="Load (Watts)">
+            <input id="app_volts" placeholder="Load Voltage (v)" hidden>
+            <input id="app_ampere" placeholder="Load Ampere (A)" hidden>
+            <label id="app_load_preview" hidden>0 Watts<label>
+        </td>
+    </tr>
+    <tr>
+        <td>Battery Type:</td>
+        <td>
+            <select id="batt_type">
+                <option value="0.5">Deep Cycle/Lead Acid</option>
+                <option value="0.95">LifePo4</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>Battery Volts:</td>
+        <td>
+            <input id="batt_volts" placeholder="Battery Voltage (v)">
+        </td>
+    </tr>
+    <tr>
+        <td>Battery Capacity:</td>
+        <td>
+            <input id="batt_capacity" placeholder="Battery Capacity (Ah)">
+        </td>
+    </tr>
+    <tr>
+        <td>Use Duration:</td>
+        <td>
+            <input id="use_duration" placeholder="Use Duration" readonly>
+        </td>
+    </tr>
+    </tr>
+    <tr>
+        <td>Charge Duration:</td>
+        <td>
+            <input id="charge_duration" placeholder="Charge Duration" readonly>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <button type="button" id="calc_btn">Calculate</button>
+        </td>
+    </tr>
+</table>
+
+<input type="range" step="1" max="24" style="width:240px;">
+
+<label for="controller_type_0" class="custom_radio active">PWM</label>
+<label for="controller_type_1" class="custom_radio">MPPT</label>
+<input type="radio" name="controller_type" id="controller_type_0" value="0" checked hidden>
+<input type="radio" name="controller_type" id="controller_type_1" value="1" hidden>
+
+<style>
+    .custom_radio {
+        border: solid 1px #ff9800;
+        border-radius: 3px;
+        box-sizing: border-box;
+        cursor: pointer;
+        display: inline-block;
+        height: 23px;
+        font-size: 15px;
+        margin: 0;
+        padding: 0 8px;
+    }
+
+    .custom_radio.active {
+        color: #ff9800;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    var solarWattageIpt;
+    var controllerTypeSlct;
+    var appLoadTypeSlct;
+    var appLoadIpt;
+    var appVoltsIpt;
+    var appAmpereIpt;
+    var appLoadLbl;
+    var battTypeSlct;
+    var battVoltsIpt;
+    var battCapacityIpt;
+    var useDurationIpt;
+    var chargeDurationIpt;
+    var calcBtn;
+
+    document.addEventListener("DOMContentLoaded", e => {
+        var activeRadio;
+        var customRadios = document.querySelectorAll(".custom_radio");
+        customRadios.forEach(customRadio => {
+            let classList = customRadio.classList;
+
+            if(classList.contains("active"))
+                activeRadio = customRadio;
+
+            customRadio.addEventListener("click", e => {
+                activeRadio.classList.remove("active");
+                classList.add("active");
+                activeRadio = customRadio;
+            });
+        });
+
+        solarWattageIpt = document.querySelector("#solar_wattage");
+        controllerTypeSlct = document.querySelector("#controller_type");
+        appLoadTypeSlct = document.querySelector("#app_load_type");
+        appLoadIpt = document.querySelector("#app_load");
+        appVoltsIpt = document.querySelector("#app_volts");
+        appAmpereIpt = document.querySelector("#app_ampere");
+        appLoadLbl = document.querySelector("#app_load_preview");
+        battTypeSlct = document.querySelector("#batt_type");
+        battVoltsIpt = document.querySelector("#batt_volts");
+        battCapacityIpt = document.querySelector("#batt_capacity");
+        useDurationIpt = document.querySelector("#use_duration");
+        chargeDurationIpt = document.querySelector("#charge_duration");
+        calcBtn = document.querySelector("#calc_btn");
+
+        appLoadTypeSlct.addEventListener("change", e =>{
+            var apptype = parseInt(appLoadTypeSlct.value);
+
+            if(apptype == 0) {
+                appLoadIpt.removeAttribute("hidden");
+                appVoltsIpt.setAttribute("hidden", true);
+                appAmpereIpt.setAttribute("hidden", true);
+                appLoadLbl.setAttribute("hidden", true);
+            } else {
+                appLoadIpt.setAttribute("hidden", true);
+                appVoltsIpt.removeAttribute("hidden");
+                appAmpereIpt.removeAttribute("hidden");
+                appLoadLbl.removeAttribute("hidden");
+            }
+        });
+
+        appVoltsIpt.addEventListener("input", calculateAppLoadFromVoltsAndAmpere);
+        appAmpereIpt.addEventListener("input", calculateAppLoadFromVoltsAndAmpere)
+
+        calcBtn.addEventListener("click", e => {
+            var appType = parseInt(appLoadTypeSlct.value);
+            var appVolts = parseFloat(appVoltsIpt.value);
+            var appAmpere = parseFloat(appAmpereIpt.value);
+            var appLoad = appType == 0 ? parseFloat(appLoadIpt.value) : appVolts * appAmpere;
+            var battDoD = parseFloat(battTypeSlct.value);
+            var battVolts = parseFloat(battVoltsIpt.value);
+            var battCapacity = parseFloat(battCapacityIpt.value);
+
+            var totalBattWatts = battVolts * battCapacity * battDoD;
+            var useDuration = totalBattWatts / appLoad;
+
+            var solarWattage = parseFloat(solarWattageIpt.value);
+            var controllerMaxCurrentOutput = solarWattage / battVolts;
+            var controllerEfficiency = parseFloat(controllerTypeSlct.value);
+            var realMaxCurrentOutput = controllerMaxCurrentOutput * (1 - 0.2) * controllerEfficiency;
+            var battChargeEfficiency = battTypeSlct.options.selectedIndex == 0 ? 0.85 : 0.95;
+            var realMaxBattCharge = battCapacity * (1 / battChargeEfficiency);
+            var chargeDuration = (realMaxBattCharge / realMaxCurrentOutput) * battDoD + 2;
+            
+            useDurationIpt.value = getFullTimeFromHours(useDuration);
+            chargeDurationIpt.value = getFullTimeFromHours(chargeDuration);
+        });
+    });
+
+    function calculateAppLoadFromVoltsAndAmpere(){
+        var appVolts = parseFloat(appVoltsIpt.value || "0");
+        var appAmpere = parseFloat(appAmpereIpt.value || "0");
+        var appLoad = appVolts * appAmpere;
+
+        appLoadLbl.innerText = `${appLoad} Watts`;
+    }
+
+    function getFullTimeFromHours(hours) {
+        var minutes = (hours * 60) % 60;
+        var seconds = (minutes * 60) % 60;
+
+        return chargeDurationIpt.value = `${Math.floor(hours)}h ${Math.floor(minutes)}m ${Math.ceil(seconds)}s (${hours.toFixed(2)})`;
+    }
+</script>
