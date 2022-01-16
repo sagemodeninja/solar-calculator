@@ -2,14 +2,23 @@
 <html>
     <head>
         <style>
+            input[type=number] {
+                border: solid 1px #8b8b8b;
+                -webkit-border-radius: 3px;
+                -moz-border-radius: 3px;
+                border-radius: 3px;
+                padding: 3px 3px 3px 8px;
+                width: auto;
+            }
+
             .custom_radio {
-                border: solid 1px #bdbdbd;
-                -webkit-border-radius: 5px;
-                -moz-border-radius: 5px;
-                border-radius: 5px;
-                display: inline-block;
+                border: solid 1px #8b8b8b;
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                border-radius: 4px;
+                display: inline-flex;
                 font-family: sans-serif;
-                padding: 1px;
+                padding: 2px;
             }
         
             .custom_radio input {
@@ -17,22 +26,80 @@
             }
         
             .custom_radio label {
+                background-color: #eeeeee;
+                border: solid 1px #eeeeee;
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                border-radius: 4px;
+                color: #616161;
                 cursor: pointer;
                 display: inline-block;
                 height: 23px;
                 line-height: 23px;
                 font-size: 13px;
-                margin: 0;
-                padding: 0 10px;
+                padding: 0px 10px;
             }
         
             .custom_radio label.active {
                 background-color: #3f51b5;
-                -webkit-border-radius: 4px;
-                -moz-border-radius: 4px;
-                border-radius: 4px;
+                border: solid 1px #3f51b5;
                 color: #ffffff;
                 font-weight: bold;
+            }
+
+            .custom_radio label:not(:last-of-type) {
+                margin-right: 3px;
+            }
+
+            #volts_n_ampere_group {
+                display: none;
+                font-family: sans-serif;
+            }
+
+            #volts_n_ampere_symbol {
+                display: inline-block;
+                margin: 0 5px;
+                width: 19px;
+            }
+
+            #volts_n_ampere_symbol span {
+                background-color: #424242;
+                display: block;
+            }
+
+            #volts_n_ampere_symbol span:first-of-type {
+                height: 3px;
+                margin-bottom: 4px;
+                width: 100%;
+            }
+
+            #volts_n_ampere_symbol span:last-of-type {
+                height: 2px;
+                margin: auto;
+                position: relative;
+                width: 5px;
+            }
+
+            #volts_n_ampere_symbol span:last-of-type::before {
+                background-color: inherit;
+                content: '';
+                display: block;
+                height: inherit;
+                right: 7px;
+                position: absolute;
+                top: 0;
+                width: 100%;
+            }
+
+            #volts_n_ampere_symbol span:last-of-type::after {
+                background-color: inherit;
+                content: '';
+                display: block;
+                height: inherit;
+                left: 7px;
+                position: absolute;
+                top: 0;
+                width: 100%;
             }
         </style>
     </head>
@@ -42,7 +109,7 @@
             <tr>
                 <td>Solar Wattage:</td>
                 <td>
-                    <input id="solar_wattage" placeholder="Solar Wattage (Watts)">
+                    <input type="number" id="solar_wattage" placeholder="Solar Wattage (Watts)">
                 </td>
             </tr>
             <tr>
@@ -54,19 +121,6 @@
                         <input type="radio" name="controller_type" id="controller_type_0" value="0.75" checked>
                         <input type="radio" name="controller_type" id="controller_type_1" value="0.95">
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td>Appliance Load:</td>
-                <td>
-                    <select id="app_load_type">
-                        <option value="0">Watts</option>
-                        <option value="1">Volts + Ampere</option>
-                    </select>
-                    <input id="app_load" placeholder="Load (Watts)">
-                    <input id="app_volts" placeholder="Load Voltage (v)" hidden>
-                    <input id="app_ampere" placeholder="Load Ampere (A)" hidden>
-                    <label id="app_load_preview" hidden>0 Watts<label>
                 </td>
             </tr>
             <tr>
@@ -83,27 +137,47 @@
             <tr>
                 <td>Battery Volts:</td>
                 <td>
-                    <input id="batt_volts" placeholder="Battery Voltage (v)">
+                    <input type="number" id="batt_volts" placeholder="Battery Voltage (v)">
                 </td>
             </tr>
             <tr>
                 <td>Battery Capacity:</td>
                 <td>
-                    <input id="batt_capacity" placeholder="Battery Capacity (Ah)">
+                    <input type="number" id="batt_capacity" placeholder="Battery Capacity (Ah)">
+                </td>
+            </tr>
+            <tr>
+                <td>Charge Duration:</td>
+                <td>
+                    <input id="charge_duration" placeholder="Charge Duration" disabled>
+                </td>
+            </tr>
+            <tr>
+                <td>Appliance Load:</td>
+                <td>
+                    <select id="app_load_type">
+                        <option value="0">Watts</option>
+                        <option value="1">Volts + Ampere</option>
+                    </select>
+                    <div id="volts_n_ampere_group">
+                        <input type="number" id="app_volts" placeholder="Load Voltage (v)">
+                        <span>V</span>
+                        <div id="volts_n_ampere_symbol">
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <input type="number" id="app_ampere" placeholder="Load Ampere (A)">
+                        <span>A = </span>
+                    </div>
+                    <input type="number" id="app_load" placeholder="Load (Watts)">
                 </td>
             </tr>
             <tr>
                 <td>Use Duration:</td>
                 <td>
-                    <input id="use_duration" placeholder="Use Duration" readonly>
+                    <input id="use_duration" placeholder="Use Duration" disabled>
                 </td>
             </tr>
-            </tr>
-            <tr>
-                <td>Charge Duration:</td>
-                <td>
-                    <input id="charge_duration" placeholder="Charge Duration" readonly>
-                </td>
             </tr>
             <tr>
                 <td colspan="2">
@@ -116,10 +190,10 @@
             var solarWattageIpt;
             var controllerTypeRads;
             var appLoadTypeSlct;
-            var appLoadIpt;
+            var voltsAmpereGroup;
             var appVoltsIpt;
             var appAmpereIpt;
-            var appLoadLbl;
+            var appLoadIpt;
             var battTypeRads;
             var battVoltsIpt;
             var battCapacityIpt;
@@ -131,10 +205,10 @@
                 solarWattageIpt = document.querySelector("#solar_wattage");
                 controllerTypeRads = document.querySelectorAll("input[name=controller_type]");
                 appLoadTypeSlct = document.querySelector("#app_load_type");
-                appLoadIpt = document.querySelector("#app_load");
+                voltsAmpereGroup = document.querySelector("#volts_n_ampere_group");
                 appVoltsIpt = document.querySelector("#app_volts");
                 appAmpereIpt = document.querySelector("#app_ampere");
-                appLoadLbl = document.querySelector("#app_load_preview");
+                appLoadIpt = document.querySelector("#app_load");
                 battTypeRads = document.querySelectorAll("input[name=batt_type]");
                 battVoltsIpt = document.querySelector("#batt_volts");
                 battCapacityIpt = document.querySelector("#batt_capacity");
@@ -157,15 +231,11 @@
                     var apptype = parseInt(appLoadTypeSlct.value);
         
                     if(apptype == 0) {
-                        appLoadIpt.removeAttribute("hidden");
-                        appVoltsIpt.setAttribute("hidden", true);
-                        appAmpereIpt.setAttribute("hidden", true);
-                        appLoadLbl.setAttribute("hidden", true);
+                        voltsAmpereGroup.style.display = "none";
+                        appLoadIpt.removeProperty("disabled");
                     } else {
-                        appLoadIpt.setAttribute("hidden", true);
-                        appVoltsIpt.removeAttribute("hidden");
-                        appAmpereIpt.removeAttribute("hidden");
-                        appLoadLbl.removeAttribute("hidden");
+                        voltsAmpereGroup.style.display = "inline-block";
+                        appLoadIpt.setAttribute("disabled", true);
                     }
                 });
         
@@ -199,7 +269,7 @@
                 var appAmpere = parseFloat(appAmpereIpt.value || "0");
                 var appLoad = appVolts * appAmpere;
         
-                appLoadLbl.innerText = `${appLoad} Watts`;
+                appLoadIpt.value = appLoad;
             }
         
             function getFullTimeFromHours(hours) {
@@ -211,6 +281,10 @@
 
             function initCustomRadio(radios, callback) {
                 radios.forEach(radio => {
+                    let _label = document.querySelector(`label[for=${radio.id}]`);
+                    let computedWidth = getComputedStyle(_label).width;
+                    _label.style.width = `${computedWidth}`;
+
                     radio.addEventListener("change", e => {
                         let value;
 
